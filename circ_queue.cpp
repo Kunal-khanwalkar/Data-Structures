@@ -1,5 +1,3 @@
-//INCOMPLETE
-
 
 #include<iostream>
 using namespace std;
@@ -25,7 +23,7 @@ public:
 template<typename T>
 circular_queue<T>::circular_queue()
 {
-	cap = 1;
+	cap = 5;
 	front = rear = 0;
 	buffer = new T[cap];
 }
@@ -56,12 +54,12 @@ void circular_queue<T>::reserve(unsigned int size)
 	}
 	
 	T *newbuff = new T[size];
+
 	int i;
 	for(i=front%cap; i!=rear%cap; i = (i+1)%cap)	
-		newbuff[i - (front%cap)] = buffer[i];		
-	newbuff[i - (front%cap)] = buffer[rear%cap];	
+		newbuff[i - (front%cap)] = buffer[i];			
 
-	rear = cap-1;
+	rear = i;
 	front = 0;
 	cap = size;
 	delete[] buffer;
@@ -70,11 +68,11 @@ void circular_queue<T>::reserve(unsigned int size)
 
 template<typename T>
 void circular_queue<T>::push(const T &item)
-{
-	if((rear%cap)+1 == front%cap)
-		reserve(cap + 5);
+{	
+	if(rear%cap==0)
+		reserve(cap*2);
 	buffer[rear%cap] = item;
-	rear++;
+	rear++;	
 }
 
 template<typename T>
@@ -84,25 +82,39 @@ void circular_queue<T>::pop()
 	{
 		cout<<"\nCircular queue is empty\n";
 		return;
-	}
-	front = (front+1)%cap;
+	}	
+	front++;
 }
 
 template<typename T>
 void circular_queue<T>::traverse()
-{
+{	
 	int i;
 	for(i=front%cap; i!=rear%cap; i=(i+1)%cap)
-		cout<<buffer[i]<<' ';
-	cout<<buffer[rear%cap]<<'\n';
+		cout<<buffer[i]<<' ';	
 }
 
 
 int main()
 {
-	circular_queue<int> cq;
+	circular_queue<int> cq;	
 	cq.push(5);
-	cq.push(7);
+	cq.push(7);	
+	cq.push(1);	
+	cq.push(3);		
+	cq.push(9);	
+	cq.pop();
+	cq.pop();
+	cq.push(8);
+	cq.traverse();	
+
+	
+	cq.push(4);
+	cq.push(8);
+	cq.pop();
+	cq.push(0);
+	cq.push(2);
+	cout<<'\n';	
 	cq.traverse();
 	return 0;
 }
