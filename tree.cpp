@@ -1,4 +1,6 @@
 #include <iostream>
+#include<stack>
+#include<queue>
 using namespace std;
 
 template<typename T>
@@ -20,13 +22,22 @@ public:
 	~tree();	
 	node<T>* returnroot();
 	node<T>* create();	
+
 	void inorder(node<T>* ptr);	
 	void preorder(node<T>* ptr);	
 	void postorder(node<T>* ptr);	
+	void iter_inorder(node<T>* ptr);
+	void iter_preorder(node<T>* ptr);
+	void iter_postorder(node<T>* ptr);
+	void levelorder(node<T>* ptr);
+
 	node<T>* parent(node<T>* ptr, const T &item);
 	int depth(node<T>* ptr);
+	int iter_depth(node<T>* ptr);
 	bool printAncestors(node<T>* ptr, const T &item);
 	int leafNodes(node<T>* ptr);
+
+
 };
 
 //Constructor, destructor and operators
@@ -43,7 +54,8 @@ tree<T>::~tree()
 	delete root;
 }
 
-//Member Functions
+
+//Tree Creation
 template<typename T>
 node<T>* tree<T>::returnroot()
 {
@@ -67,39 +79,142 @@ node<T>* tree<T>::create()
 	return temp;
 }
 
+
+
+//Traversals
 template<typename T>
 void tree<T>::inorder(node<T>* ptr)
 {
-	if(ptr)
-	{
-		inorder(ptr->left);
-		cout<<ptr->data<<' ';
-		inorder(ptr->right);
-	}
+	if(ptr==nullptr)
+		return;
+	
+	inorder(ptr->left);
+	cout<<ptr->data<<' ';
+	inorder(ptr->right);
 }	
 
 template<typename T>
 void tree<T>::preorder(node<T>* ptr)
 {
-	if(ptr)
-	{
-		cout<<ptr->data<<' ';
-		inorder(ptr->left);
-		inorder(ptr->right);
-	}
+	if(ptr==nullptr)
+		return;
+
+	cout<<ptr->data<<' ';
+	preorder(ptr->left);
+	preorder(ptr->right);
 }	
 
 template<typename T>
 void tree<T>::postorder(node<T>* ptr)
 {
-	if(ptr)
-	{
-		inorder(ptr->left);
-		inorder(ptr->right);
-		cout<<ptr->data<<' ';
-	}
+	if(ptr==nullptr)
+		return;
+
+	postorder(ptr->left);
+	postorder(ptr->right);
+	cout<<ptr->data<<' ';	
 }	
 
+
+template<typename T>
+void tree<T>::iter_inorder(node<T>* ptr)
+{
+	stack<node<T>*> s;
+	node<T>* curr = ptr;
+
+	while(curr != nullptr || !s.empty())
+	{
+		while(curr != nullptr)
+		{
+			s.push(curr);
+			curr = curr->left;
+		}
+
+		curr = s.top();
+		s.pop();
+
+		cout<<curr->data<<' ';
+
+		curr = curr->right;
+	}
+}
+
+template<typename T>
+void tree<T>::iter_preorder(node<T>* ptr)
+{
+	stack<node<T>*> s;
+	node<T>* curr = ptr;
+
+	while(curr != nullptr || !s.empty())
+	{
+		while(curr != nullptr)
+		{
+			cout<<curr->data<<' ';
+			s.push(curr);
+			curr = curr->left;
+		}
+
+		curr = s.top();
+		s.pop();		
+
+		curr = curr->right;
+	}
+}
+
+template<typename T>
+void tree<T>::iter_postorder(node<T>* ptr)
+{
+	if(ptr==nullptr)
+		return;
+
+	stack<node<T>*> s1,s2;
+	s1.push(ptr);
+	node<T>* curr;
+
+	while(!s1.empty())
+	{
+		curr = s1.top();
+		s1.pop();
+		s2.push(curr);
+
+		if(curr->left)
+			s1.push(curr->left);
+		if(curr->right)
+			s1.push(curr->right);
+	}
+
+	while(!s2.empty())
+	{
+		curr = s2.top();
+		s2.pop();
+		cout<<curr->data<<' ';
+	}
+}
+
+template<typename T>
+void tree<T>::levelorder(node<T>* ptr)
+{
+	if(ptr==nullptr)
+		return;
+
+	queue<node<T>*> q;
+	q.push(ptr);
+
+	while(!q.empty())
+	{
+		node<T>* curr = q.front();
+		cout<<curr->data<<' ';
+		q.pop();
+
+		if(curr->left != nullptr)
+			q.push(curr->left);
+		if(curr->right != nullptr)
+			q.push(curr->right);		
+	}
+}
+
+
+//Auxiliary functions
 template<typename T>
 node<T>* tree<T>::parent(node<T>* ptr, const T &item)
 {	
@@ -127,6 +242,38 @@ int tree<T>::depth(node<T>* ptr)
 		return ldepth+1;
 	else
 		return rdepth+1;
+}
+
+template<typename T>
+int tree<T>::iter_depth(node<T>* ptr)
+{
+	if(ptr==nullptr)
+		return 0;
+
+	queue<node<T>*> q;
+	q.push(ptr);
+	int height = 0;
+
+	while(true)
+	{
+		int cnt = q.size();
+		if(cnt==0)
+			break;
+		height++;
+
+		while(cnt>0)
+		{
+			node<T>* curr = q.front();
+			q.pop();
+			if(curr->left != nullptr)
+				q.push(curr->left);
+			if(curr->right != nullptr)
+				q.push(curr->right);
+			cnt--;
+		}
+	}
+
+	return height;
 }
 
 template<typename T>
@@ -158,22 +305,39 @@ int tree<T>::leafNodes(node<T>* ptr)
 
 
 
+
+
 int main()
 {	
 	tree<int> t;
 	node<int>* root = t.returnroot();
 	root = t.create();
+
+	cout<<"\nInorder: ";
 	t.inorder(root);
-	cout<<'\n';
+	cout<<"\nPreorder: ";
 	t.preorder(root);
-	cout<<'\n';
+	cout<<"\nPostorder: ";
 	t.postorder(root);	
+
+	cout<<"\nIterative inorder: ";
+	t.iter_inorder(root);
+	cout<<"\nIterative preorder: ";
+	t.iter_preorder(root);
+	cout<<"\nIterative postorder: ";
+	t.iter_postorder(root);
+
+	cout<<"\nLevel order: ";
+	t.levelorder(root);
+	
 	node<int>* randomnode = t.parent(root,4);		
 	cout<<"\nDepth: "<<t.depth(root);
+	cout<<"\nIterative Depth: "<<t.iter_depth(root);
 
 	cout<<"\nAncestors: ";
 	bool check = t.printAncestors(root,4);
 
 	cout<<"\nNumber of Leaf nodes: "<<t.leafNodes(root);
+	
 	return 0;
 }
