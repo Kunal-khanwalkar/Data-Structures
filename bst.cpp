@@ -1,5 +1,6 @@
 #include<iostream>
 #include<queue>
+#include<stack>
 using namespace std;
 
 
@@ -34,6 +35,8 @@ public:
 	int height(node<T>* ptr);
 	int nodeCount(node<T>* ptr);
 	bool isBst(node<T>* ptr, T prev);
+	node<T>* nextSuccessor(node<T>* ptr, node<T>* n);
+	node<T>* nextSuccessor(node<T>* ptr, const T &item);
 };
 
 //Constructors, Destructors and Operators
@@ -265,6 +268,61 @@ bool bst<T>::isBst(node<T>* ptr, T prev)
 }
 
 
+template<typename T>
+node<T>* bst<T>::nextSuccessor(node<T>* ptr, node<T>* n)
+{
+	if(n->right)
+		return minNode(n->right);
+
+	node<T>* succ = nullptr;
+
+	while(ptr)
+	{
+		if(n->data < ptr->data)
+		{
+			succ = ptr;
+			ptr = ptr->left;
+		}		
+		else if(n->data > ptr->data)
+			ptr = ptr->right;
+		else
+			break;
+	}
+
+	return succ;
+}
+
+
+template<typename T>
+node<T>* bst<T>::nextSuccessor(node<T>* ptr, const T &item)
+{	
+	stack<node<T>*> s;
+	node<T>* curr = ptr;
+	bool flag = false;
+
+	while(curr != nullptr || !s.empty())
+	{
+		while(curr != nullptr)
+		{
+			s.push(curr);
+			curr = curr->left;
+		}		
+
+		curr = s.top();
+		s.pop();
+
+		if(flag == true)
+			return curr;
+		
+		if(curr->data == item)
+			flag = true;
+
+		curr = curr->right;
+	}
+
+	return nullptr;
+}
+
 
 
 int main()
@@ -311,6 +369,17 @@ int main()
 		cout<<"\nTree is BST";
 	else
 		cout<<"\nTree is not BST";
+
+	ptr = root->right->left;
+	cout<<"\nCurrent node: "<<ptr->data;
+	ptr = t.nextSuccessor(root,ptr);
+	cout<<"\nNext successor: "<<ptr->data;
+
+	ptr = t.nextSuccessor(root,3);
+	if(ptr)
+		cout<<"\nNext successor: "<<ptr->data;
+	else
+		cout<<"\nNode not found";
 
 	return 0;
 }
