@@ -36,8 +36,7 @@ public:
 	int iter_depth(node<T>* ptr);
 	bool printAncestors(node<T>* ptr, const T &item);
 	int leafNodes(node<T>* ptr);
-
-
+	void deleteNode(node<T>* ptr, const T &item);
 };
 
 //Constructor, destructor and operators
@@ -199,10 +198,11 @@ void tree<T>::levelorder(node<T>* ptr)
 
 	queue<node<T>*> q;
 	q.push(ptr);
+	node<T>* curr;
 
 	while(!q.empty())
 	{
-		node<T>* curr = q.front();
+		curr = q.front();
 		cout<<curr->data<<' ';
 		q.pop();
 
@@ -210,7 +210,7 @@ void tree<T>::levelorder(node<T>* ptr)
 			q.push(curr->left);
 		if(curr->right != nullptr)
 			q.push(curr->right);		
-	}
+	}	
 }
 
 
@@ -304,6 +304,54 @@ int tree<T>::leafNodes(node<T>* ptr)
 }
 
 
+template<typename T>
+void tree<T>::deleteNode(node<T>* ptr, const T &item)
+{
+	if(ptr==nullptr)
+		return;
+
+	queue<node<T>*> q;
+	q.push(ptr);
+	node<T>* last;
+
+	while(!q.empty())
+	{
+		last = q.front();		
+		q.pop();
+
+		if(last->left != nullptr)
+			q.push(last->left);
+		if(last->right != nullptr)
+			q.push(last->right);		
+	}
+
+
+	queue<node<T>*> empty;
+	swap(q,empty);
+	q.push(ptr);
+	node<T>* curr;
+
+	while(!q.empty())
+	{
+		curr = q.front();
+
+		if(curr->data == item && curr!=last)
+			curr->data = last->data;
+
+		if(curr->left == last)		
+			curr->left = nullptr;		
+		else if(curr->right == last)
+			curr->right = nullptr;		
+
+		q.pop();
+
+		if(curr->left != nullptr)
+			q.push(curr->left);
+		if(curr->right != nullptr)
+			q.push(curr->right);		
+	}
+
+}
 
 
 
@@ -339,5 +387,10 @@ int main()
 
 	cout<<"\nNumber of Leaf nodes: "<<t.leafNodes(root);
 	
+	t.deleteNode(root,9);
+	cout<<"\nInorder after deletion: ";
+	t.inorder(root);
+
+
 	return 0;
 }
